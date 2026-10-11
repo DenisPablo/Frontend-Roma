@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#0f172a" />
+  <circle cx="256" cy="256" r="210" stroke="#f59e0b" stroke-width="8" stroke-dasharray="16 12" opacity="0.6"/>
+  <!-- Roman Column & Laurel Wreath Design -->
+  <path d="M190 380h132M205 380V190M307 380V190M170 190h172M160 160h192" stroke="#f59e0b" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="285" r="24" fill="#f59e0b"/>
+  <!-- Laurel leaves on sides -->
+  <path d="M140 220c-15 30-10 70 15 100M372 220c15 30 10 70-15 100" stroke="#fbbf24" stroke-width="12" stroke-linecap="round"/>
+</svg>
