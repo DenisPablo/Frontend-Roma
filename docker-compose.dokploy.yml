@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  roma-backend:
+    build:
+      context: ../Roma_backend
+      dockerfile: Dockerfile
+    container_name: roma-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - Roma__DbPath=/app/data/roma.db
+      - Roma__Categories=Trabajo,Estudio,Salud,Personal,Hogar,Otros
+      - Roma__AppTz=America/Argentina/Buenos_Aires
+      - Roma__EventReminderOffsets=-1d,-2h,0
+      - Roma__TelegramBotToken=${TELEGRAM_BOT_TOKEN:-}
+      - Roma__TelegramChatId=${TELEGRAM_CHAT_ID:-}
+    volumes:
+      - roma_data:/app/data
+    networks:
+      - roma-net
+    expose:
+      - "8080"
+
+  roma-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roma-frontend
+    restart: unless-stopped
+    environment:
+      - PORT=80
+      - API_URL=http://roma-backend:8080
+    ports:
+      - "80:80"
+    depends_on:
+      - roma-backend
+    networks:
+      - roma-net
+
+volumes:
+  roma_data:
+    driver: local
+
+networks:
+  roma-net:
+    driver: bridge
