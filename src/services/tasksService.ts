@@ -11,6 +11,10 @@ export interface GetTasksFilter {
   day?: string;
   from?: string;
   to?: string;
+  month?: string;
+  categoryId?: number;
+  status?: string;
+  kind?: string;
 }
 
 export const tasksService = {
@@ -20,6 +24,10 @@ export const tasksService = {
       day: filter.day,
       from: filter.from,
       to: filter.to,
+      month: filter.month,
+      categoryId: filter.categoryId,
+      status: filter.status,
+      kind: filter.kind,
     });
   },
 

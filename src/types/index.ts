@@ -76,4 +76,62 @@ export interface CreateWorkoutSessionPayload {
   notes?: string | null;
 }
 
-export type TabType = 'tasks' | 'events' | 'gym' | 'categories';
+export type TabType = 'tasks' | 'events' | 'gym' | 'categories' | 'dashboard';
+
+export interface PeriodStats {
+  from: string;
+  to: string;
+  month?: string | null;
+}
+
+export interface MuscleGroupCount {
+  muscleGroup: string;
+  count: number;
+}
+
+export interface WorkoutStats {
+  totalSessions: number;
+  distinctDaysCount: number;
+  averageRpe: number;
+  sessionDates: string[];
+  byMuscleGroup: MuscleGroupCount[];
+}
+
+export interface TaskStats {
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  inProgressTasks: number;
+  notDoneTasks: number;
+  completionRate: number;
+  totalDurationSeconds: number;
+  formattedTotalDuration: string;
+}
+
+export interface CategoryStats {
+  categoryId: number;
+  categoryName: string;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  completionRate: number;
+  totalDurationSeconds: number;
+  formattedTotalDuration: string;
+}
+
+export interface DailyActivityStats {
+  date: string;
+  tasksTotal: number;
+  tasksCompleted: number;
+  tasksPending: number;
+  hadWorkout: boolean;
+  workoutCount: number;
+}
+
+export interface DashboardStats {
+  period: PeriodStats;
+  workouts: WorkoutStats;
+  tasks: TaskStats;
+  categories: CategoryStats[];
+  dailyActivity: DailyActivityStats[];
+}

@@ -56,14 +56,29 @@ server {
         return 503 '{"status":503,"error":"BackendUnavailable","message":"El servicio backend no está disponible temporalmente o está reiniciando. Por favor, reintente en unos instantes."}';
     }
 
-    # ── PWA Service Worker & Manifest (Sin Cache para updates inmediatos) ──
-    location ~* (sw\.js|manifest\.webmanifest)$ {
+    # ── PWA Web Manifest (MIME type application/manifest+json obligatorio para Chromium/Brave) ──
+    location = /manifest.webmanifest {
+        default_type application/manifest+json;
+        types {
+            application/manifest+json webmanifest;
+        }
         expires -1;
         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     }
 
-    # ── Assets estáticos con hash (Cache agresivo) ─────────────────────────
-    location ~* \.(?:css|js|woff2?|svg|png|jpg|jpeg|gif|ico)$ {
+    # ── Service Worker & Scripts PWA ──
+    location ~* (sw\.js|registerSW\.js)$ {
+        default_type application/javascript;
+        types {
+            application/javascript js;
+        }
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+        add_header Service-Worker-Allowed "/";
+    }
+
+    # ── Assets estáticos con hash y media (Cache agresivo) ─────────────────
+    location ~* \.(?:css|js|woff2?|svg|png|jpg|jpeg|gif|ico|webp)$ {
         expires 1y;
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
