@@ -9,7 +9,9 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_URLS=http://+:8080
+      - DB_PATH=/app/data/roma.db
       - Roma__DbPath=/app/data/roma.db
       - Roma__Categories=Trabajo,Estudio,Salud,Personal,Hogar,Otros
       - Roma__AppTz=America/Argentina/Buenos_Aires

@@ -42,6 +42,30 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function fetchWithRetry(url: string, init: RequestInit, maxRetries = 2, delayMs = 500): Promise<Response> {
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetch(url, init);
+      if (init.method === 'GET' && (res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxRetries) {
+        attempt++;
+        await sleep(delayMs * attempt);
+        continue;
+      }
+      return res;
+    } catch (err) {
+      if (init.method === 'GET' && attempt < maxRetries) {
+        attempt++;
+        await sleep(delayMs * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 export const apiClient = {
   async get<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
     const url = new URL(`${BASE_URL}${path}`, window.location.origin);
@@ -53,7 +77,7 @@ export const apiClient = {
       });
     }
 
-    const res = await fetch(url.toString(), {
+    const res = await fetchWithRetry(url.toString(), {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

@@ -28,18 +28,32 @@ server {
     gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
 
     # ── Proxy Inverso /api hacia el Backend ────────────────────────────────
-    # Elimina problemas de CORS y centraliza el ruteo interno en Dokploy
+    # Resiliente: resolución DNS en runtime con resolver Docker/DNS público
+    # Evita que Nginx crashee al arrancar si el backend aún no está listo o cambia de IP
     location /api/ {
-        proxy_pass ${API_URL};
+        resolver 127.0.0.11 1.1.1.1 8.8.8.8 valid=30s ipv6=off;
+        set $upstream_backend "${API_URL}";
+        proxy_pass $upstream_backend;
+
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_connect_timeout 60s;
+        proxy_connect_timeout 10s;
         proxy_read_timeout 120s;
         proxy_send_timeout 120s;
         client_max_body_size 25M;
+
+        # Manejo de fallos transitorios del backend
+        proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+        error_page 502 503 504 = @backend_down;
+    }
+
+    # Respuesta JSON estructurada si el backend no responde (en lugar del HTML 502 por defecto de Nginx)
+    location @backend_down {
+        default_type application/json;
+        return 503 '{"status":503,"error":"BackendUnavailable","message":"El servicio backend no está disponible temporalmente o está reiniciando. Por favor, reintente en unos instantes."}';
     }
 
     # ── PWA Service Worker & Manifest (Sin Cache para updates inmediatos) ──

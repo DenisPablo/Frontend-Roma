@@ -38,8 +38,11 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 # Default runtime environment variables for Dokploy
 ENV PORT=80
 ENV API_URL=http://roma-backend:8080
-
 EXPOSE 80
+
+# Healthcheck para Dokploy / Docker (resiliencia y auto-recuperación)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:80/ || exit 1
 
 STOPSIGNAL SIGQUIT
 
