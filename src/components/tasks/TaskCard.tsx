@@ -107,6 +107,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </span>
 
             {/* Status Badges */}
+            {task.status === 'pending' && task.formattedDuration && (
+              <Badge variant="default" className="text-slate-300 border-slate-700 bg-slate-800/80">
+                <Clock size={12} className="text-amber-400" />
+                <span>{task.formattedDuration}</span>
+              </Badge>
+            )}
+
             {isInProgress && (
               <Badge variant="warning" className="animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />

@@ -29,6 +29,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [day, setDay] = useState(currentDate);
   const [scheduledTime, setScheduledTime] = useState(getCurrentTimeString());
   const [categoryId, setCategoryId] = useState<number>(categories[0]?.id || 1);
+  const [durationMinutes, setDurationMinutes] = useState<string>('');
+  const [isCompletedOnCreate, setIsCompletedOnCreate] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,10 +40,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setDay(taskToEdit.day);
       setScheduledTime(taskToEdit.scheduledTime);
       setCategoryId(taskToEdit.categoryId);
+      setDurationMinutes(
+        taskToEdit.durationSeconds != null ? String(Math.round(taskToEdit.durationSeconds / 60)) : ''
+      );
+      setIsCompletedOnCreate(false);
     } else {
       setTitle('');
       setDay(currentDate);
       setScheduledTime(getCurrentTimeString());
+      setDurationMinutes('');
+      setIsCompletedOnCreate(false);
       if (categories.length > 0) {
         setCategoryId(categories[0].id);
       }
@@ -60,6 +68,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       return;
     }
 
+    const parsedMinutes = durationMinutes.trim() ? Number(durationMinutes) : null;
+    if (parsedMinutes !== null && (isNaN(parsedMinutes) || parsedMinutes < 0)) {
+      setError('La duración debe ser un número mayor o igual a 0.');
+      return;
+    }
+    const durationSeconds = parsedMinutes !== null ? Math.round(parsedMinutes * 60) : null;
+
     setIsLoading(true);
     setError(null);
 
@@ -70,6 +85,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           day,
           scheduledTime,
           categoryId,
+          durationSeconds,
         });
       } else {
         await onSubmitCreate({
@@ -78,6 +94,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           scheduledTime,
           categoryId,
           kind: 'task',
+          durationSeconds,
+          isCompleted: isCompletedOnCreate,
         });
       }
       onClose();
@@ -154,6 +172,38 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           <div className="text-xs text-amber-400">
             No hay categorías registradas. La tarea usará la categoría por defecto.
           </div>
+        )}
+
+        <div className="space-y-1.5 pt-1">
+          <Input
+            label={taskToEdit?.status === 'completed' ? 'Duración realizada (minutos)' : 'Duración estimada / prevista (minutos, opcional)'}
+            type="number"
+            min="0"
+            step="1"
+            placeholder={taskToEdit?.status === 'completed' ? 'Ej: 45' : 'Ej: 30'}
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(e.target.value)}
+          />
+          {taskToEdit?.status === 'completed' && (
+            <p className="text-[11px] text-slate-400">
+              Podés ajustar los minutos reales que te llevó completar esta tarea para corregir tus métricas de tiempo.
+            </p>
+          )}
+        </div>
+
+        {!taskToEdit && (
+          <label className="flex items-center gap-2.5 p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-900 transition-colors">
+            <input
+              type="checkbox"
+              checked={isCompletedOnCreate}
+              onChange={(e) => setIsCompletedOnCreate(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950"
+            />
+            <div className="text-xs">
+              <span className="font-medium text-slate-200">Marcar como ya completada</span>
+              <p className="text-[11px] text-slate-400">Registra la tarea como finalizada con la duración indicada</p>
+            </div>
+          </label>
         )}
 
         <div className="pt-2 flex items-center justify-end gap-2.5">

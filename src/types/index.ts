@@ -40,6 +40,8 @@ export interface CreateTaskPayload {
   categoryId: number;
   kind?: TaskKind;
   reminders?: string[]; // e.g. ["-1d", "-2h", "0"]
+  durationSeconds?: number | null;
+  isCompleted?: boolean;
 }
 
 export interface UpdateTaskPayload {
@@ -47,6 +49,7 @@ export interface UpdateTaskPayload {
   day?: string;
   scheduledTime?: string;
   categoryId?: number;
+  durationSeconds?: number | null;
 }
 
 export interface CompleteTaskResult {

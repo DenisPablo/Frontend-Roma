@@ -107,4 +107,25 @@ describe('TaskCard Component', () => {
     fireEvent.click(editButton);
     expect(handleEdit).toHaveBeenCalledWith(completedTask);
   });
+
+  it('renders preset duration badge for pending tasks', () => {
+    const taskWithPreset: TaskItem = {
+      ...mockTask,
+      durationSeconds: 1800,
+      formattedDuration: '30m',
+    };
+
+    render(
+      <TaskCard
+        task={taskWithPreset}
+        category={mockCategory}
+        onStart={vi.fn()}
+        onComplete={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('30m')).toBeInTheDocument();
+  });
 });
