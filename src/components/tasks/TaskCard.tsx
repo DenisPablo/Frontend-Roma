@@ -165,8 +165,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </button>
           )}
 
-          {/* Edit Button (only allowed if pending) */}
-          {task.status === 'pending' && (
+          {/* Edit Button (allowed for pending, completed, not_done) */}
+          {task.status !== 'in_progress' && (
             <button
               onClick={() => onEdit(task)}
               className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"

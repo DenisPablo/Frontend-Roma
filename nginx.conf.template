@@ -57,10 +57,10 @@ server {
     }
 
     # ── PWA Web Manifest (MIME type application/manifest+json obligatorio para Chromium/Brave) ──
-    location = /manifest.webmanifest {
+    location ~* ^/(manifest\.webmanifest|manifest\.json)$ {
         default_type application/manifest+json;
         types {
-            application/manifest+json webmanifest;
+            application/manifest+json webmanifest json;
         }
         expires -1;
         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";

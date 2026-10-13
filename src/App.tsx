@@ -16,6 +16,7 @@ import { WorkoutModal } from './components/gym/WorkoutModal';
 import { CategoryManager } from './components/categories/CategoryManager';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { Badge } from './components/ui/Badge';
+import { Modal } from './components/ui/Modal';
 import { Dumbbell, Calendar, CheckSquare, RefreshCw, Download } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -41,6 +42,14 @@ export const App: React.FC = () => {
 
   // PWA Install prompt state
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPwaHelpOpen, setIsPwaHelpOpen] = useState(false);
+  const isStandalone = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    );
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -298,21 +307,32 @@ export const App: React.FC = () => {
       {/* Main View Area */}
       <main className="flex-1 max-w-lg w-full mx-auto p-4 space-y-4">
         {/* PWA Install Banner */}
-        {deferredPrompt && (
-          <div className="bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-lg">
-            <div className="flex items-center gap-2.5">
+        {!isStandalone && (
+          <div className="bg-gradient-to-r from-amber-500/15 via-slate-900 to-indigo-500/15 border border-amber-500/30 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-2.5 min-w-0">
               <Download className="text-amber-400 shrink-0" size={18} />
-              <div className="text-xs">
-                <p className="font-semibold text-white">Instalar Roma en Android</p>
-                <p className="text-slate-400">Accede directo desde tu pantalla de inicio</p>
+              <div className="text-xs truncate">
+                <p className="font-semibold text-white truncate">Instalar Roma en Android / PWA</p>
+                <p className="text-slate-400 text-[11px] truncate">Acceso directo y pantalla completa</p>
               </div>
             </div>
-            <button
-              onClick={handleInstallPWA}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl shrink-0 touch-press shadow"
-            >
-              Instalar
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {deferredPrompt && (
+                <button
+                  onClick={handleInstallPWA}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl touch-press shadow"
+                >
+                  Instalar
+                </button>
+              )}
+              <button
+                onClick={() => setIsPwaHelpOpen(true)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-2.5 py-1.5 rounded-xl border border-slate-700 touch-press"
+                aria-label="Guía para instalar en Brave o Android"
+              >
+                {deferredPrompt ? 'Guía' : 'Instalar'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -521,6 +541,55 @@ export const App: React.FC = () => {
         currentDate={currentDate}
         onSubmitCreate={handleCreateWorkout}
       />
+
+      {/* PWA Install Guidance Modal for Brave & Android */}
+      <Modal
+        isOpen={isPwaHelpOpen}
+        onClose={() => setIsPwaHelpOpen(false)}
+        title="Instalación en Brave / Android"
+      >
+        <div className="space-y-4 text-xs text-slate-300">
+          <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+            <h4 className="font-semibold text-amber-400 text-sm flex items-center gap-2">
+              <Download size={16} /> Pasos para instalar en Brave:
+            </h4>
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-200 pl-1 leading-relaxed">
+              <li>Tocá los <strong>tres puntos verticales (⋮)</strong> en la barra de Brave.</li>
+              <li>Seleccioná <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>.</li>
+              <li>Aceptá la ventana de confirmación del sistema.</li>
+            </ol>
+          </div>
+
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl space-y-2 text-rose-300">
+            <h4 className="font-semibold text-rose-400">
+              ⚠️ ¿Por qué suele fallar en Brave Android?
+            </h4>
+            <p className="leading-relaxed">
+              En dispositivos Android (especialmente <strong>Xiaomi / HyperOS / MIUI</strong>, Realme y Samsung), el sistema bloquea por defecto que navegadores de terceros añadan accesos directos al launcher.
+            </p>
+            <p className="font-medium text-slate-100">
+              Solución en los ajustes de tu teléfono:
+            </p>
+            <ol className="list-decimal list-inside space-y-1 pl-1 text-slate-200">
+              <li>Abrí <strong>Ajustes del teléfono</strong> &gt; <strong>Aplicaciones</strong>.</li>
+              <li>Buscá <strong>Brave</strong> &gt; <strong>Otros permisos</strong> (o <em>Permisos avanzados</em>).</li>
+              <li>Habilitá <strong>"Accesos directos en pantalla de inicio"</strong>.</li>
+            </ol>
+          </div>
+
+          {deferredPrompt && (
+            <button
+              onClick={() => {
+                handleInstallPWA();
+                setIsPwaHelpOpen(false);
+              }}
+              className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-center shadow touch-press"
+            >
+              Probar instalación automática ahora
+            </button>
+          )}
+        </div>
+      </Modal>
 
       {/* Bottom Nav */}
       <BottomNav

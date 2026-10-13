@@ -93,6 +93,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     label: c.name,
   }));
 
+  const isScheduleLocked = Boolean(taskToEdit && taskToEdit.status !== 'pending');
+
   return (
     <Modal
       isOpen={isOpen}
@@ -103,6 +105,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         {error && (
           <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300">
             {error}
+          </div>
+        )}
+
+        {isScheduleLocked && (
+          <div className="text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl leading-relaxed">
+            La fecha y horario están bloqueados porque la tarea ya fue finalizada. Podés actualizar el nombre y la categoría.
           </div>
         )}
 
@@ -121,6 +129,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             type="date"
             value={day}
             onChange={(e) => setDay(e.target.value)}
+            disabled={isScheduleLocked}
             required
           />
 
@@ -129,6 +138,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             type="time"
             value={scheduledTime}
             onChange={(e) => setScheduledTime(e.target.value)}
+            disabled={isScheduleLocked}
             required
           />
         </div>

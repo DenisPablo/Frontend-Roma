@@ -27,6 +27,7 @@ export const Input: React.FC<InputProps> = ({
         className={clsx(
           'w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500',
+          'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-900/50',
           error ? 'border-rose-500' : 'border-slate-800 hover:border-slate-700',
           className
         )}

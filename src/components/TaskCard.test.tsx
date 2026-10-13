@@ -81,4 +81,30 @@ describe('TaskCard Component', () => {
     expect(screen.getByText('Completar')).toBeInTheDocument();
     expect(screen.getByText(/En curso:/)).toBeInTheDocument();
   });
+
+  it('renders edit button for completed tasks and calls onEdit', () => {
+    const completedTask: TaskItem = {
+      ...mockTask,
+      status: 'completed',
+      completedAt: new Date().toISOString(),
+      durationSeconds: 120,
+    };
+
+    const handleEdit = vi.fn();
+    render(
+      <TaskCard
+        task={completedTask}
+        category={mockCategory}
+        onStart={vi.fn()}
+        onComplete={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={handleEdit}
+      />
+    );
+
+    const editButton = screen.getByLabelText('Editar tarea');
+    expect(editButton).toBeInTheDocument();
+    fireEvent.click(editButton);
+    expect(handleEdit).toHaveBeenCalledWith(completedTask);
+  });
 });
