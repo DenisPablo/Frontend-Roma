@@ -131,7 +131,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         <div className="space-y-2">
           <label className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
             <Bell size={13} className="text-amber-400" />
-            <span>Avisos de Telegram configurados</span>
+            <span>Recordatorios push (Ntfy)</span>
           </label>
           <div className="grid grid-cols-2 gap-2">
             {DEFAULT_REMINDER_OPTIONS.map((opt) => {

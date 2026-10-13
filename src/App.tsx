@@ -409,7 +409,7 @@ export const App: React.FC = () => {
                 <div>
                   <p className="text-sm font-semibold text-white">No hay eventos especiales</p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Registra exámenes o citas con recordatorios múltiples por Telegram.
+                    Registra exámenes o citas con recordatorios múltiples push por Ntfy.
                   </p>
                 </div>
               </div>
