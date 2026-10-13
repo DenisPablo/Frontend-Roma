@@ -31,8 +31,12 @@ export const Header: React.FC<HeaderProps> = ({
         return 'Registrar Gym';
       case 'categories':
         return 'Nueva Categoría';
+      case 'dashboard':
+        return null;
     }
   };
+
+  const addButtonTitle = getAddButtonTitle();
 
   return (
     <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 safe-top px-4 py-3">
@@ -60,18 +64,20 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={onOpenCreateModal}
-          className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-xl font-semibold text-xs shadow-md shadow-amber-500/20 touch-press"
-          aria-label={getAddButtonTitle()}
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          <span>{getAddButtonTitle()}</span>
-        </button>
+        {addButtonTitle && (
+          <button
+            onClick={onOpenCreateModal}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-xl font-semibold text-xs shadow-md shadow-amber-500/20 touch-press"
+            aria-label={addButtonTitle}
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            <span>{addButtonTitle}</span>
+          </button>
+        )}
       </div>
 
       {/* Date Navigation Bar (shown on tasks, events and gym tabs) */}
-      {activeTab !== 'categories' && (
+      {activeTab !== 'categories' && activeTab !== 'dashboard' && (
         <div className="flex items-center justify-between bg-slate-900/80 border border-slate-800/80 rounded-2xl p-1.5">
           <button
             onClick={() => onShiftDate(-1)}

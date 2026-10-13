@@ -98,3 +98,33 @@ export function formatReminderOffset(offsetMinutes: number): string {
   }
   return `${abs}m antes`;
 }
+
+export function getCurrentMonthString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+export function shiftMonthString(monthStr: string, deltaMonths: number): string {
+  try {
+    const [y, m] = monthStr.split('-').map(Number);
+    const date = new Date(y, m - 1 + deltaMonths, 1);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  } catch {
+    return monthStr;
+  }
+}
+
+export function formatMonthHeading(monthStr: string): string {
+  try {
+    const [y, m] = monthStr.split('-').map(Number);
+    const date = new Date(y, m - 1, 1);
+    const formatted = format(date, "MMMM 'de' yyyy", { locale: es });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  } catch {
+    return monthStr;
+  }
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, Calendar, Dumbbell, Tags } from 'lucide-react';
+import { CheckSquare, Calendar, Dumbbell, Tags, BarChart3 } from 'lucide-react';
 import { TabType } from '../../types';
 import { clsx } from 'clsx';
 
@@ -35,6 +35,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       icon: Dumbbell,
     },
     {
+      id: 'dashboard' as TabType,
+      label: 'Métricas',
+      icon: BarChart3,
+    },
+    {
       id: 'categories' as TabType,
       label: 'Categorías',
       icon: Tags,
@@ -43,7 +48,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/80 safe-bottom">
-      <div className="grid grid-cols-4 max-w-md mx-auto px-2 py-1">
+      <div className="grid grid-cols-5 max-w-md mx-auto px-1 py-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

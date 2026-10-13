@@ -7,6 +7,9 @@ import {
   formatReminderOffset,
   formatDateHeading,
   calculateElapsedSeconds,
+  getCurrentMonthString,
+  shiftMonthString,
+  formatMonthHeading,
 } from './date';
 
 describe('Date and Time Utils', () => {
@@ -51,5 +54,21 @@ describe('Date and Time Utils', () => {
     const elapsed = calculateElapsedSeconds(past);
     expect(elapsed).toBeGreaterThanOrEqual(9);
     expect(elapsed).toBeLessThanOrEqual(12);
+  });
+
+  it('getCurrentMonthString returns YYYY-MM format', () => {
+    const month = getCurrentMonthString();
+    expect(month).toMatch(/^\d{4}-\d{2}$/);
+  });
+
+  it('shiftMonthString navigates months correctly', () => {
+    expect(shiftMonthString('2026-10', 1)).toBe('2026-11');
+    expect(shiftMonthString('2026-10', -1)).toBe('2026-09');
+    expect(shiftMonthString('2026-12', 1)).toBe('2027-01');
+    expect(shiftMonthString('2026-01', -1)).toBe('2025-12');
+  });
+
+  it('formatMonthHeading capitalizes and formats month and year', () => {
+    expect(formatMonthHeading('2026-10')).toBe('Octubre de 2026');
   });
 });

@@ -14,6 +14,7 @@ import { EventModal } from './components/events/EventModal';
 import { WorkoutCard } from './components/gym/WorkoutCard';
 import { WorkoutModal } from './components/gym/WorkoutModal';
 import { CategoryManager } from './components/categories/CategoryManager';
+import { DashboardView } from './components/dashboard/DashboardView';
 import { Badge } from './components/ui/Badge';
 import { Dumbbell, Calendar, CheckSquare, RefreshCw, Download } from 'lucide-react';
 
@@ -487,6 +488,11 @@ export const App: React.FC = () => {
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
           />
+        )}
+
+        {/* Tab Content: DASHBOARD */}
+        {activeTab === 'dashboard' && (
+          <DashboardView />
         )}
       </main>
 
