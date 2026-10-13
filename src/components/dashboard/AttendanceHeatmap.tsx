@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { clsx } from 'clsx';
 import { Dumbbell, Flame, CheckCircle2, Award } from 'lucide-react';
-import { DailyActivityStats } from '../../types';
+import { DailyActivityStats, WorkoutSessionSummary } from '../../types';
 
 interface AttendanceHeatmapProps {
   month: string; // YYYY-MM
@@ -10,6 +10,7 @@ interface AttendanceHeatmapProps {
   totalSessions: number;
   distinctDaysCount: number;
   averageRpe: number;
+  recentSessions?: WorkoutSessionSummary[];
 }
 
 export const AttendanceHeatmap: React.FC<AttendanceHeatmapProps> = ({
@@ -19,6 +20,7 @@ export const AttendanceHeatmap: React.FC<AttendanceHeatmapProps> = ({
   totalSessions,
   distinctDaysCount,
   averageRpe,
+  recentSessions,
 }) => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -156,33 +158,93 @@ export const AttendanceHeatmap: React.FC<AttendanceHeatmapProps> = ({
       </div>
 
       {/* Selected Day Popover Card */}
-      {selectedDate && (
-        <div className="p-3 bg-slate-950/90 rounded-2xl border border-slate-800 text-xs animate-in fade-in duration-150">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="font-semibold text-slate-200">
-              Fecha: {selectedDate}
-            </span>
-            <button
-              onClick={() => setSelectedDate(null)}
-              className="text-slate-400 hover:text-slate-200 text-xs px-1.5 py-0.5 rounded"
-            >
-              Cerrar
-            </button>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className={clsx('flex items-center space-x-1 font-medium', isSelectedWorkout ? 'text-emerald-400' : 'text-slate-500')}>
-              <Dumbbell size={14} />
-              <span>{isSelectedWorkout ? 'Entrenamiento realizado' : 'Sin sesión de gimnasio'}</span>
-            </span>
-            {selectedActivity && selectedActivity.tasksCompleted > 0 && (
-              <span className="flex items-center space-x-1 text-indigo-400 font-medium">
-                <CheckCircle2 size={14} />
-                <span>{selectedActivity.tasksCompleted} tareas listas</span>
+      {selectedDate && (() => {
+        const daySessions = recentSessions?.filter((s) => s.date === selectedDate) ?? [];
+
+        return (
+          <div className="p-4 bg-slate-950/95 rounded-2xl border border-slate-800 text-xs animate-in fade-in duration-150 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span className="font-semibold text-slate-200">
+                Detalle del {selectedDate}
               </span>
+              <button
+                onClick={() => setSelectedDate(null)}
+                className="text-slate-400 hover:text-slate-200 text-xs px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            {/* Sessions details if workout was recorded on this day */}
+            {daySessions.length > 0 ? (
+              <div className="space-y-2">
+                <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider block">
+                  Entrenamientos ({daySessions.length})
+                </span>
+                {daySessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-100 flex items-center gap-1.5 text-sm">
+                        <Dumbbell size={15} className="text-amber-400" />
+                        {s.targetMuscleGroup}
+                      </span>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800/60">
+                        RPE {s.rpe}/10
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5 text-center pt-1">
+                      <div className="bg-slate-950/70 p-1.5 rounded-lg border border-slate-800/60">
+                        <span className="text-[10px] text-slate-400 block">Duración</span>
+                        <span className="text-xs font-semibold text-slate-200">
+                          ⏱ {s.durationMinutes} min
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-950/70 p-1.5 rounded-lg border border-slate-800/60">
+                        <span className="text-[10px] text-slate-400 block">Calidad</span>
+                        <span className="text-xs font-semibold text-indigo-300">
+                          ⚡ {s.feeling}/5
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-950/70 p-1.5 rounded-lg border border-slate-800/60">
+                        <span className="text-[10px] text-slate-400 block">Recuperación</span>
+                        <span className="text-xs font-semibold text-emerald-300">
+                          🔋 {s.recoveryScore}/5
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : isSelectedWorkout ? (
+              <div className="flex items-center space-x-1.5 text-emerald-400 font-medium">
+                <Dumbbell size={14} />
+                <span>Entrenamiento realizado</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1.5 text-slate-500">
+                <Dumbbell size={14} />
+                <span>Sin sesión de gimnasio</span>
+              </div>
+            )}
+
+            {/* Tasks summary */}
+            {selectedActivity && (selectedActivity.tasksCompleted > 0 || selectedActivity.tasksPending > 0) && (
+              <div className="flex items-center space-x-2 text-indigo-400 font-medium pt-1 border-t border-slate-800/60">
+                <CheckCircle2 size={14} />
+                <span>
+                  {selectedActivity.tasksCompleted} tareas listas de {selectedActivity.tasksTotal}
+                </span>
+              </div>
             )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

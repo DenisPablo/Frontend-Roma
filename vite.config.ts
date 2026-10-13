@@ -53,14 +53,14 @@ export default defineConfig({
             short_name: 'Gym',
             description: 'Registrar entrenamiento físico',
             url: '/?tab=gym',
-            icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+            icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }]
           },
           {
             name: 'Métricas',
             short_name: 'Métricas',
             description: 'Ver dashboard y métricas mensuales',
             url: '/?tab=dashboard',
-            icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+            icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }]
           }
         ]
       },

@@ -29,6 +29,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
 }) => {
   const [date, setDate] = useState(currentDate);
   const [targetMuscleGroup, setTargetMuscleGroup] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState<number>(60);
   const [rpe, setRpe] = useState<number>(7);
   const [feeling, setFeeling] = useState<number>(4);
   const [recoveryScore, setRecoveryScore] = useState<number>(4);
@@ -42,6 +43,10 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
       setError('Debes especificar el grupo muscular o tipo de sesión.');
       return;
     }
+    if (durationMinutes <= 0) {
+      setError('La duración debe ser mayor a 0 minutos.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -50,6 +55,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
       await onSubmitCreate({
         date,
         targetMuscleGroup: targetMuscleGroup.trim(),
+        durationMinutes,
         rpe,
         feeling,
         recoveryScore,
@@ -59,6 +65,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
       // Reset
       setTargetMuscleGroup('');
       setNotes('');
+      setDurationMinutes(60);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al guardar la sesión de gimnasio');
     } finally {
@@ -105,6 +112,35 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
                 }`}
               >
                 {preset}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Duration input with presets */}
+        <div className="space-y-1.5">
+          <Input
+            label="Duración (minutos)"
+            type="number"
+            min={1}
+            max={600}
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(parseInt(e.target.value, 10) || 60)}
+            required
+          />
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {[45, 60, 75, 90, 120].map((mins) => (
+              <button
+                type="button"
+                key={mins}
+                onClick={() => setDurationMinutes(mins)}
+                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all touch-press ${
+                  durationMinutes === mins
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 font-medium'
+                    : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                ⏱ {mins} min
               </button>
             ))}
           </div>

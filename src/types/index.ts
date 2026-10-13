@@ -66,6 +66,7 @@ export interface WorkoutSession {
   feeling: number; // 1-5
   recoveryScore: number; // 1-5
   notes?: string | null;
+  durationMinutes?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -77,6 +78,7 @@ export interface CreateWorkoutSessionPayload {
   feeling: number;
   recoveryScore: number;
   notes?: string | null;
+  durationMinutes?: number | null;
 }
 
 export type TabType = 'tasks' | 'events' | 'gym' | 'categories' | 'dashboard';
@@ -92,12 +94,23 @@ export interface MuscleGroupCount {
   count: number;
 }
 
+export interface WorkoutSessionSummary {
+  id: number;
+  date: string;
+  targetMuscleGroup: string;
+  rpe: number;
+  feeling: number;
+  recoveryScore: number;
+  durationMinutes: number;
+}
+
 export interface WorkoutStats {
   totalSessions: number;
   distinctDaysCount: number;
   averageRpe: number;
   sessionDates: string[];
   byMuscleGroup: MuscleGroupCount[];
+  recentSessions?: WorkoutSessionSummary[];
 }
 
 export interface TaskStats {

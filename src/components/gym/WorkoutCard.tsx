@@ -1,6 +1,6 @@
 import React from 'react';
 import { WorkoutSession } from '../../types';
-import { Dumbbell, BatteryCharging, Smile, Trash2, Calendar } from 'lucide-react';
+import { Dumbbell, BatteryCharging, Smile, Trash2, Calendar, Clock } from 'lucide-react';
 import { formatDateShort } from '../../utils/date';
 
 interface WorkoutCardProps {
@@ -18,15 +18,15 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onDelete }) =
   const getFeelingEmoji = (feeling: number) => {
     switch (feeling) {
       case 5:
-        return '⚡ Excelente';
+        return '⚡ Excelente (5)';
       case 4:
-        return '💪 Muy bien';
+        return '💪 Muy bien (4)';
       case 3:
-        return '😐 Normal';
+        return '😐 Normal (3)';
       case 2:
-        return '😓 Pesado';
+        return '😓 Pesado (2)';
       case 1:
-        return '😫 Agotado';
+        return '😫 Agotado (1)';
       default:
         return `${feeling}/5`;
     }
@@ -43,10 +43,15 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onDelete }) =
     <div className="p-4 rounded-2xl border bg-slate-900/80 border-slate-800 hover:border-slate-700 transition-all">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-slate-800/60 px-2 py-0.5 rounded-md border border-slate-700/60">
               <Calendar size={12} />
               {formatDateShort(session.date)}
+            </span>
+
+            <span className="flex items-center gap-1 text-[11px] font-mono text-amber-300 bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-800/50">
+              <Clock size={12} />
+              {session.durationMinutes ?? 60} min
             </span>
 
             <span
@@ -74,11 +79,21 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onDelete }) =
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
         <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/50 flex items-center gap-2">
-          <Smile size={16} className="text-amber-400 shrink-0" />
+          <Clock size={16} className="text-amber-400 shrink-0" />
           <div className="min-w-0">
-            <span className="text-[10px] text-slate-400 block">Sensación</span>
+            <span className="text-[10px] text-slate-400 block">Duración</span>
+            <span className="text-xs font-medium text-slate-200 truncate block">
+              {session.durationMinutes ?? 60} min
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/50 flex items-center gap-2">
+          <Smile size={16} className="text-indigo-400 shrink-0" />
+          <div className="min-w-0">
+            <span className="text-[10px] text-slate-400 block">Calidad / Sensación</span>
             <span className="text-xs font-medium text-slate-200 truncate block">
               {getFeelingEmoji(session.feeling)}
             </span>

@@ -18,7 +18,7 @@ server {
     # A05: Restricción de APIs del dispositivo
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
     # A03: Content Security Policy estricta para PWA
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http: https: ws: wss:; object-src 'none'; base-uri 'self';" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http: https: ws: wss:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self';" always;
 
     # ── Performance: Compresión Gzip para mobile PWA ──────────────────────
     gzip on;

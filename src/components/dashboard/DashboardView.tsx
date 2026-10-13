@@ -173,6 +173,7 @@ export const DashboardView: React.FC = () => {
             totalSessions={stats.workouts.totalSessions}
             distinctDaysCount={stats.workouts.distinctDaysCount}
             averageRpe={stats.workouts.averageRpe}
+            recentSessions={stats.workouts.recentSessions}
           />
 
           {/* Category Time Pie / Donut Chart */}

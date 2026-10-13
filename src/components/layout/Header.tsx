@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Download } from 'lucide-react';
 import { formatDateHeading } from '../../utils/date';
 import { TabType } from '../../types';
 
@@ -11,6 +11,8 @@ interface HeaderProps {
   isOnline: boolean;
   activeTab: TabType;
   onOpenCreateModal: () => void;
+  canInstall?: boolean;
+  onInstall?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -20,6 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
   isOnline,
   activeTab,
   onOpenCreateModal,
+  canInstall,
+  onInstall,
 }) => {
   const getAddButtonTitle = () => {
     switch (activeTab) {
@@ -64,16 +68,30 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {addButtonTitle && (
-          <button
-            onClick={onOpenCreateModal}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-xl font-semibold text-xs shadow-md shadow-amber-500/20 touch-press"
-            aria-label={addButtonTitle}
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>{addButtonTitle}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {canInstall && (
+            <button
+              onClick={onInstall}
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 px-2.5 py-1.5 rounded-xl font-medium text-xs touch-press transition-colors shadow-sm"
+              title="Instalar App Roma"
+              aria-label="Instalar App"
+            >
+              <Download size={15} />
+              <span className="hidden sm:inline">Instalar</span>
+            </button>
+          )}
+
+          {addButtonTitle && (
+            <button
+              onClick={onOpenCreateModal}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-xl font-semibold text-xs shadow-md shadow-amber-500/20 touch-press"
+              aria-label={addButtonTitle}
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>{addButtonTitle}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Date Navigation Bar (shown on tasks, events and gym tabs) */}
