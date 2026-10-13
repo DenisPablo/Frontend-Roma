@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { TabType, TaskItem, Category, WorkoutSession, CreateTaskPayload, UpdateTaskPayload, CreateWorkoutSessionPayload } from './types';
+import { TabType, TaskItem, Category, WorkoutSession, CreateTaskPayload, UpdateTaskPayload, CreateWorkoutSessionPayload, UpdateWorkoutSessionPayload } from './types';
 import { tasksService } from './services/tasksService';
 import { categoriesService } from './services/categoriesService';
 import { workoutsService } from './services/workoutsService';
@@ -33,11 +33,11 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  // Modals
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<TaskItem | null>(null);
+  const [workoutToEdit, setWorkoutToEdit] = useState<WorkoutSession | null>(null);
 
   // PWA Install prompt state
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -222,6 +222,12 @@ export const App: React.FC = () => {
     await loadWorkouts();
   };
 
+  const handleUpdateWorkout = async (id: number, payload: UpdateWorkoutSessionPayload) => {
+    await workoutsService.update(id, payload);
+    showToast('Sesión de entrenamiento actualizada.');
+    await loadWorkouts();
+  };
+
   const handleDeleteWorkout = async (id: number) => {
     try {
       await workoutsService.delete(id);
@@ -262,6 +268,7 @@ export const App: React.FC = () => {
         setIsEventModalOpen(true);
         break;
       case 'gym':
+        setWorkoutToEdit(null);
         setIsWorkoutModalOpen(true);
         break;
       case 'categories':
@@ -273,6 +280,11 @@ export const App: React.FC = () => {
   const handleOpenEditTask = (t: TaskItem) => {
     setTaskToEdit(t);
     setIsTaskModalOpen(true);
+  };
+
+  const handleOpenEditWorkout = (session: WorkoutSession) => {
+    setWorkoutToEdit(session);
+    setIsWorkoutModalOpen(true);
   };
 
   // Filter workouts for current date if desired or show recent
@@ -436,6 +448,7 @@ export const App: React.FC = () => {
                   <WorkoutCard
                     key={session.id}
                     session={session}
+                    onEdit={handleOpenEditWorkout}
                     onDelete={handleDeleteWorkout}
                   />
                 ))}
@@ -444,7 +457,10 @@ export const App: React.FC = () => {
               <div className="p-3 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
                 <span className="text-xs text-slate-400">No registraste sesión hoy</span>
                 <button
-                  onClick={() => setIsWorkoutModalOpen(true)}
+                  onClick={() => {
+                    setWorkoutToEdit(null);
+                    setIsWorkoutModalOpen(true);
+                  }}
                   className="text-xs text-amber-400 font-semibold hover:underline"
                 >
                   + Registrar hoy
@@ -462,6 +478,7 @@ export const App: React.FC = () => {
                   <WorkoutCard
                     key={session.id}
                     session={session}
+                    onEdit={handleOpenEditWorkout}
                     onDelete={handleDeleteWorkout}
                   />
                 ))}
@@ -507,9 +524,14 @@ export const App: React.FC = () => {
 
       <WorkoutModal
         isOpen={isWorkoutModalOpen}
-        onClose={() => setIsWorkoutModalOpen(false)}
+        onClose={() => {
+          setIsWorkoutModalOpen(false);
+          setWorkoutToEdit(null);
+        }}
         currentDate={currentDate}
+        workoutToEdit={workoutToEdit}
         onSubmitCreate={handleCreateWorkout}
+        onSubmitUpdate={handleUpdateWorkout}
       />
 
       {/* Bottom Nav */}

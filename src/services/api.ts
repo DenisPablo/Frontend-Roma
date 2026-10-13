@@ -100,6 +100,19 @@ export const apiClient = {
     return handleResponse<T>(res);
   },
 
+  async put<T>(path: string, body?: unknown): Promise<T> {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    return handleResponse<T>(res);
+  },
+
   async patch<T>(path: string, body: unknown): Promise<T> {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: 'PATCH',

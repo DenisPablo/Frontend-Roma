@@ -1,14 +1,15 @@
 import React from 'react';
 import { WorkoutSession } from '../../types';
-import { Dumbbell, BatteryCharging, Smile, Trash2, Calendar, Clock } from 'lucide-react';
+import { Dumbbell, BatteryCharging, Smile, Trash2, Calendar, Clock, Edit2 } from 'lucide-react';
 import { formatDateShort } from '../../utils/date';
 
 interface WorkoutCardProps {
   session: WorkoutSession;
+  onEdit?: (session: WorkoutSession) => void;
   onDelete: (id: number) => Promise<void>;
 }
 
-export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onDelete }) => {
+export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onEdit, onDelete }) => {
   const getRpeBadgeStyle = (rpe: number) => {
     if (rpe <= 4) return 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60';
     if (rpe <= 7) return 'bg-amber-950/60 text-amber-300 border-amber-800/60';
@@ -69,13 +70,30 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ session, onDelete }) =
           </h3>
         </div>
 
-        <button
-          onClick={handleDelete}
-          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
-          aria-label="Eliminar sesión"
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(session);
+              }}
+              className="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Editar sesión"
+              title="Editar sesión"
+            >
+              <Edit2 size={16} />
+            </button>
+          )}
+
+          <button
+            onClick={handleDelete}
+            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Eliminar sesión"
+            title="Eliminar sesión"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Metrics Row */}

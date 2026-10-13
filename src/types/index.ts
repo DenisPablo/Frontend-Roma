@@ -81,6 +81,16 @@ export interface CreateWorkoutSessionPayload {
   durationMinutes?: number | null;
 }
 
+export interface UpdateWorkoutSessionPayload {
+  date?: string;
+  targetMuscleGroup?: string;
+  rpe?: number;
+  feeling?: number;
+  recoveryScore?: number;
+  notes?: string | null;
+  durationMinutes?: number | null;
+}
+
 export type TabType = 'tasks' | 'events' | 'gym' | 'categories' | 'dashboard';
 
 export interface PeriodStats {

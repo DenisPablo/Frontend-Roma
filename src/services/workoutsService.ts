@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { WorkoutSession, CreateWorkoutSessionPayload } from '../types';
+import { WorkoutSession, CreateWorkoutSessionPayload, UpdateWorkoutSessionPayload } from '../types';
 
 export const workoutsService = {
   async getSessions(from?: string, to?: string, month?: string): Promise<WorkoutSession[]> {
@@ -12,6 +12,10 @@ export const workoutsService = {
 
   async create(payload: CreateWorkoutSessionPayload): Promise<WorkoutSession> {
     return apiClient.post<WorkoutSession>('/workouts', payload);
+  },
+
+  async update(id: number, payload: UpdateWorkoutSessionPayload): Promise<WorkoutSession> {
+    return apiClient.put<WorkoutSession>(`/workouts/${id}`, payload);
   },
 
   async delete(id: number): Promise<void> {

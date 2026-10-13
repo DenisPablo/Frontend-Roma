@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { WorkoutCard } from './gym/WorkoutCard';
 import { WorkoutSession } from '../types';
 
@@ -26,5 +26,16 @@ describe('WorkoutCard Component', () => {
     expect(screen.getByText(/⚡ Excelente/)).toBeInTheDocument();
     expect(screen.getByText('4 / 5')).toBeInTheDocument();
     expect(screen.getByText('"Excelente congestión"')).toBeInTheDocument();
+  });
+
+  it('triggers onEdit when edit button is clicked', () => {
+    const onEditMock = vi.fn();
+    render(<WorkoutCard session={mockSession} onEdit={onEditMock} onDelete={vi.fn()} />);
+
+    const editBtn = screen.getByLabelText('Editar sesión');
+    fireEvent.click(editBtn);
+
+    expect(onEditMock).toHaveBeenCalledTimes(1);
+    expect(onEditMock).toHaveBeenCalledWith(mockSession);
   });
 });

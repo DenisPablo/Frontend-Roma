@@ -103,4 +103,31 @@ describe('API Services', () => {
       })
     );
   });
+
+  it('workoutsService.update sends PUT update payload', async () => {
+    const updatePayload = {
+      targetMuscleGroup: 'Pecho y Tríceps',
+      rpe: 9,
+      durationMinutes: 75,
+    };
+    const mockUpdated = { id: 5, date: '2026-10-15', feeling: 4, recoveryScore: 4, ...updatePayload };
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => mockUpdated,
+    } as Response);
+
+    const result = await workoutsService.update(5, updatePayload);
+    expect(result.targetMuscleGroup).toBe('Pecho y Tríceps');
+    expect(result.rpe).toBe(9);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/workouts/5'),
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify(updatePayload),
+      })
+    );
+  });
 });

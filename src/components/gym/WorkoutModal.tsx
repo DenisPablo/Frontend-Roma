@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { CreateWorkoutSessionPayload } from '../../types';
+import { WorkoutSession, CreateWorkoutSessionPayload, UpdateWorkoutSessionPayload } from '../../types';
 
 interface WorkoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentDate: string;
+  workoutToEdit?: WorkoutSession | null;
   onSubmitCreate: (payload: CreateWorkoutSessionPayload) => Promise<void>;
+  onSubmitUpdate?: (id: number, payload: UpdateWorkoutSessionPayload) => Promise<void>;
 }
 
 const MUSCLE_PRESETS = [
@@ -25,7 +27,9 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
   isOpen,
   onClose,
   currentDate,
+  workoutToEdit,
   onSubmitCreate,
+  onSubmitUpdate,
 }) => {
   const [date, setDate] = useState(currentDate);
   const [targetMuscleGroup, setTargetMuscleGroup] = useState('');
@@ -36,6 +40,27 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (workoutToEdit) {
+      setDate(workoutToEdit.date);
+      setTargetMuscleGroup(workoutToEdit.targetMuscleGroup);
+      setDurationMinutes(workoutToEdit.durationMinutes ?? 60);
+      setRpe(workoutToEdit.rpe);
+      setFeeling(workoutToEdit.feeling);
+      setRecoveryScore(workoutToEdit.recoveryScore);
+      setNotes(workoutToEdit.notes || '');
+    } else {
+      setDate(currentDate);
+      setTargetMuscleGroup('');
+      setDurationMinutes(60);
+      setRpe(7);
+      setFeeling(4);
+      setRecoveryScore(4);
+      setNotes('');
+    }
+    setError(null);
+  }, [isOpen, workoutToEdit, currentDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +77,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
     setError(null);
 
     try {
-      await onSubmitCreate({
+      const payload = {
         date,
         targetMuscleGroup: targetMuscleGroup.trim(),
         durationMinutes,
@@ -60,12 +85,14 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
         feeling,
         recoveryScore,
         notes: notes.trim() ? notes.trim() : null,
-      });
+      };
+
+      if (workoutToEdit && onSubmitUpdate) {
+        await onSubmitUpdate(workoutToEdit.id, payload);
+      } else {
+        await onSubmitCreate(payload);
+      }
       onClose();
-      // Reset
-      setTargetMuscleGroup('');
-      setNotes('');
-      setDurationMinutes(60);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al guardar la sesión de gimnasio');
     } finally {
@@ -74,7 +101,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Registrar Sesión de Gym">
+    <Modal isOpen={isOpen} onClose={onClose} title={workoutToEdit ? 'Editar Sesión de Gym' : 'Registrar Sesión de Gym'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300">
@@ -261,7 +288,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
             Cancelar
           </Button>
           <Button type="submit" variant="gold" isLoading={isLoading}>
-            Guardar Sesión
+            {workoutToEdit ? 'Guardar Cambios' : 'Guardar Sesión'}
           </Button>
         </div>
       </form>
