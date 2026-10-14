@@ -8,8 +8,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/logo.svg', 'icons/icon-192x192.png', 'icons/icon-512x512.png'],
+      injectRegister: 'auto',
+      includeAssets: ['favicon.ico', 'icons/apple-touch-icon.png', 'icons/logo.svg', 'icons/icon-192x192.png', 'icons/icon-512x512.png'],
       manifest: {
         id: '/',
         name: 'Roma - Tracking & Productividad',
