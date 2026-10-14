@@ -8,7 +8,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'manifest.json', 'icons/logo.svg', 'icons/icon-192x192.png', 'icons/icon-512x512.png'],
+      injectRegister: 'script',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/logo.svg', 'icons/icon-192x192.png', 'icons/icon-512x512.png'],
       manifest: {
         id: '/',
         name: 'Roma - Tracking & Productividad',
@@ -65,7 +66,15 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+      },
+      devOptions: {
+        enabled: false,
       }
     })
   ],
