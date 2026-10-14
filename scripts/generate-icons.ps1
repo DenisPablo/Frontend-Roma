@@ -66,15 +66,9 @@ function Generate-RomaIcon {
     Write-Host "Generated $outputPath ($size x $size)"
 }
 
-$iconsDir = Join-Path $PSScriptRoot "..\public\icons"
-if (-not (Test-Path $iconsDir)) {
-    New-Item -ItemType Directory -Force -Path $iconsDir | Out-Null
-}
-
 $publicDir = Join-Path $PSScriptRoot "..\public"
 
-Generate-RomaIcon -size 512 -outputPath (Join-Path $iconsDir "icon-512x512.png")
-Generate-RomaIcon -size 192 -outputPath (Join-Path $iconsDir "icon-192x192.png")
-Generate-RomaIcon -size 180 -outputPath (Join-Path $iconsDir "apple-touch-icon.png")
+Generate-RomaIcon -size 512 -outputPath (Join-Path $publicDir "icon-512x512.png")
+Generate-RomaIcon -size 192 -outputPath (Join-Path $publicDir "icon-192x192.png")
 Generate-RomaIcon -size 180 -outputPath (Join-Path $publicDir "apple-touch-icon.png")
 Generate-RomaIcon -size 64  -outputPath (Join-Path $publicDir "favicon.ico")

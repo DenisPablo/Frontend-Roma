@@ -57,10 +57,10 @@ server {
     }
 
     # ── PWA Web Manifest (MIME type application/manifest+json obligatorio para Chromium/Brave) ──
-    location ~* ^/(manifest\.webmanifest|manifest\.json)$ {
+    location ~* ^/(manifest\.json|manifest\.webmanifest)$ {
         default_type application/manifest+json;
         types {
-            application/manifest+json webmanifest json;
+            application/manifest+json json webmanifest;
         }
         expires -1;
         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
@@ -68,8 +68,8 @@ server {
         try_files $uri =404;
     }
 
-    # ── Service Worker & Scripts PWA (sw.js, registerSW.js, workbox-*.js) ──
-    location ~* ^/(sw\.js|registerSW\.js|workbox-[a-zA-Z0-9_-]+\.js)$ {
+    # ── Service Worker PWA (/sw.js) ───────────────────────────────────────
+    location = /sw.js {
         default_type application/javascript;
         types {
             application/javascript js;
@@ -89,16 +89,8 @@ server {
         try_files $uri =404;
     }
 
-    # ── Iconos PWA y assets sin hash (Cache corto, revalidable) ────────────
-    location ~* ^/icons/.*\.(?:png|svg|webp)$ {
-        expires 1d;
-        add_header Cache-Control "public, max-age=86400, must-revalidate" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        try_files $uri =404;
-    }
-
-    # ── Favicon e íconos raíz ───────────────────────────────────────────────
-    location ~* ^/(?:favicon\.ico|apple-touch-icon.*\.png|icon-.*\.png)$ {
+    # ── Favicon e iconos raíz PWA (Cache corto, revalidable) ────────────────
+    location ~* ^/(?:favicon\.ico|apple-touch-icon.*\.png|icon-.*\.png|logo\.svg)$ {
         expires 1d;
         add_header Cache-Control "public, max-age=86400, must-revalidate" always;
         add_header X-Content-Type-Options "nosniff" always;
