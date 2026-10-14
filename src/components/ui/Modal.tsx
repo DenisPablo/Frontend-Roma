@@ -31,7 +31,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       />
 
       {/* Sheet / Dialog Container */}
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 z-10 max-h-[90vh] overflow-y-auto safe-bottom">
+      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 z-10 max-h-[88vh] overflow-y-auto safe-bottom animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
         {/* Mobile handle indicator */}
         <div className="sm:hidden flex justify-center mb-3">
           <div className="w-12 h-1.5 bg-slate-700 rounded-full" />

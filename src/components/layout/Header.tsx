@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   const addButtonTitle = getAddButtonTitle();
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 safe-top px-4 py-3">
+    <header className="flex-shrink-0 sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 safe-top px-4 py-2.5">
       {/* Top Bar: Brand, Status & Add Action */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
