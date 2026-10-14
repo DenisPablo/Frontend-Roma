@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { TabType, TaskItem, Category, WorkoutSession, CreateTaskPayload, UpdateTaskPayload, CreateWorkoutSessionPayload, UpdateWorkoutSessionPayload } from './types';
 import { tasksService } from './services/tasksService';
 import { categoriesService } from './services/categoriesService';
@@ -15,6 +15,7 @@ import { WorkoutCard } from './components/gym/WorkoutCard';
 import { WorkoutModal } from './components/gym/WorkoutModal';
 import { CategoryManager } from './components/categories/CategoryManager';
 import { DashboardView } from './components/dashboard/DashboardView';
+import { PomodoroView } from './components/pomodoro/PomodoroView';
 import { Badge } from './components/ui/Badge';
 import { Dumbbell, Calendar, CheckSquare, RefreshCw } from 'lucide-react';
 
@@ -37,6 +38,7 @@ export const App: React.FC = () => {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<TaskItem | null>(null);
+  const [eventToEdit, setEventToEdit] = useState<TaskItem | null>(null);
   const [workoutToEdit, setWorkoutToEdit] = useState<WorkoutSession | null>(null);
 
   // PWA Install prompt state
@@ -81,16 +83,33 @@ export const App: React.FC = () => {
     return map;
   }, [categories]);
 
+  // Consecutive failure tracking for resilient offline damping
+  const consecutiveFailuresRef = useRef<number>(0);
+
+  const handleNetworkSuccess = useCallback(() => {
+    consecutiveFailuresRef.current = 0;
+    setIsOnline(true);
+  }, []);
+
+  const handleNetworkFailure = useCallback(() => {
+    consecutiveFailuresRef.current += 1;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setIsOnline(false);
+    } else if (consecutiveFailuresRef.current >= 3) {
+      setIsOnline(false);
+    }
+  }, []);
+
   // Load Categories
   const loadCategories = useCallback(async () => {
     try {
       const data = await categoriesService.getAll();
       setCategories(data);
-      setIsOnline(true);
+      handleNetworkSuccess();
     } catch {
-      setIsOnline(false);
+      handleNetworkFailure();
     }
-  }, []);
+  }, [handleNetworkSuccess, handleNetworkFailure]);
 
   // Load Tasks for current date
   const loadDayTasks = useCallback(async (date: string) => {
@@ -98,33 +117,33 @@ export const App: React.FC = () => {
       const data = await tasksService.getTasks({ date });
       // Only keep kind === 'task'
       setTasks(data.filter((t) => t.kind === 'task'));
-      setIsOnline(true);
+      handleNetworkSuccess();
     } catch {
-      setIsOnline(false);
+      handleNetworkFailure();
     }
-  }, []);
+  }, [handleNetworkSuccess, handleNetworkFailure]);
 
   // Load Events (all future and past events)
   const loadEvents = useCallback(async () => {
     try {
       const data = await tasksService.getTasks();
       setAllEvents(data.filter((t) => t.kind === 'event'));
-      setIsOnline(true);
+      handleNetworkSuccess();
     } catch {
-      setIsOnline(false);
+      handleNetworkFailure();
     }
-  }, []);
+  }, [handleNetworkSuccess, handleNetworkFailure]);
 
   // Load Workouts
   const loadWorkouts = useCallback(async () => {
     try {
       const data = await workoutsService.getSessions();
       setWorkouts(data);
-      setIsOnline(true);
+      handleNetworkSuccess();
     } catch {
-      setIsOnline(false);
+      handleNetworkFailure();
     }
-  }, []);
+  }, [handleNetworkSuccess, handleNetworkFailure]);
 
   // Initial and reactive load
   const reloadAll = useCallback(async () => {
@@ -140,6 +159,27 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     reloadAll();
+  }, [reloadAll]);
+
+  // Window online/offline listener to auto-reload when connection is restored
+  useEffect(() => {
+    const handleOnline = () => {
+      consecutiveFailuresRef.current = 0;
+      setIsOnline(true);
+      reloadAll();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [reloadAll]);
 
   // Date Shift Handler
@@ -205,6 +245,15 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleUpdateEvent = async (id: number, payload: UpdateTaskPayload) => {
+    await tasksService.update(id, payload);
+    showToast('Evento actualizado correctamente.');
+    await loadEvents();
+    if (payload.day === currentDate || eventToEdit?.day === currentDate) {
+      await loadDayTasks(currentDate);
+    }
+  };
+
   const handleDeleteEvent = async (id: number) => {
     try {
       await tasksService.delete(id);
@@ -265,6 +314,7 @@ export const App: React.FC = () => {
         setIsTaskModalOpen(true);
         break;
       case 'events':
+        setEventToEdit(null);
         setIsEventModalOpen(true);
         break;
       case 'gym':
@@ -272,7 +322,9 @@ export const App: React.FC = () => {
         setIsWorkoutModalOpen(true);
         break;
       case 'categories':
-        // handled in category manager inline
+      case 'dashboard':
+      case 'pomodoro':
+        // handled inline or no modal
         break;
     }
   };
@@ -398,6 +450,10 @@ export const App: React.FC = () => {
                     event={event}
                     category={categoryMap.get(event.categoryId)}
                     onDelete={handleDeleteEvent}
+                    onEdit={(evt) => {
+                      setEventToEdit(evt);
+                      setIsEventModalOpen(true);
+                    }}
                   />
                 ))}
               </div>
@@ -497,6 +553,19 @@ export const App: React.FC = () => {
           />
         )}
 
+        {/* Tab Content: POMODORO */}
+        {activeTab === 'pomodoro' && (
+          <PomodoroView
+            categories={categories}
+            currentDate={currentDate}
+            dayTasks={tasks}
+            onSessionLogged={async () => {
+              await loadDayTasks(currentDate);
+            }}
+            showToast={showToast}
+          />
+        )}
+
         {/* Tab Content: DASHBOARD */}
         {activeTab === 'dashboard' && (
           <DashboardView />
@@ -516,10 +585,15 @@ export const App: React.FC = () => {
 
       <EventModal
         isOpen={isEventModalOpen}
-        onClose={() => setIsEventModalOpen(false)}
+        onClose={() => {
+          setIsEventModalOpen(false);
+          setEventToEdit(null);
+        }}
         categories={categories}
         currentDate={currentDate}
+        eventToEdit={eventToEdit}
         onSubmitCreate={handleCreateEvent}
+        onSubmitUpdate={handleUpdateEvent}
       />
 
       <WorkoutModal

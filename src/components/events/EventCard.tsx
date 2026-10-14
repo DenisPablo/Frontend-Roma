@@ -1,19 +1,21 @@
 import React from 'react';
 import { TaskItem, Category } from '../../types';
 import { Badge } from '../ui/Badge';
-import { Calendar, Clock, Bell, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Bell, Trash2, Pencil } from 'lucide-react';
 import { formatReminderOffset, formatDateShort } from '../../utils/date';
 
 interface EventCardProps {
   event: TaskItem;
   category?: Category;
   onDelete: (id: number) => Promise<void>;
+  onEdit?: (event: TaskItem) => void;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
   event,
   category,
   onDelete,
+  onEdit,
 }) => {
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,14 +76,26 @@ export const EventCard: React.FC<EventCardProps> = ({
           )}
         </div>
 
-        {/* Delete action */}
-        <button
-          onClick={handleDelete}
-          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
-          aria-label="Eliminar evento"
-        >
-          <Trash2 size={16} />
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit?.(event);
+            }}
+            className="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Editar evento"
+          >
+            <Pencil size={15} />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Eliminar evento"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );

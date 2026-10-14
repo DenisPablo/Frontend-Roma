@@ -44,23 +44,66 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function fetchWithRetry(url: string, init: RequestInit, maxRetries = 2, delayMs = 500): Promise<Response> {
+const RETRY_STATUS_CODES = new Set([408, 502, 503, 504]);
+const RETRY_DELAYS = [400, 1000, 2500, 4000];
+const DEFAULT_TIMEOUT_MS = 15000;
+
+function isNetworkOrTransientError(err: unknown): boolean {
+  if (err instanceof TypeError) return true;
+  if (err instanceof DOMException && err.name === 'TimeoutError') return true;
+  if (err instanceof Error) {
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') return true;
+    const msg = err.message.toLowerCase();
+    if (
+      msg.includes('failed to fetch') ||
+      msg.includes('networkerror') ||
+      msg.includes('network request failed') ||
+      msg.includes('load failed') ||
+      msg.includes('the operation was aborted')
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export async function fetchWithRetry(
+  url: string,
+  init: RequestInit = {},
+  maxRetries = 3
+): Promise<Response> {
   let attempt = 0;
+
   while (true) {
+    const timeoutSignal =
+      typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(DEFAULT_TIMEOUT_MS) : undefined;
+    const signal = init.signal || timeoutSignal;
+
     try {
-      const res = await fetch(url, init);
-      if (init.method === 'GET' && (res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxRetries) {
+      const res = await fetch(url, { ...init, signal });
+
+      if (RETRY_STATUS_CODES.has(res.status) && attempt < maxRetries) {
         attempt++;
-        await sleep(delayMs * attempt);
+        const baseDelay = RETRY_DELAYS[attempt - 1] ?? 4000;
+        const jitter = Math.floor(Math.random() * 200);
+        await sleep(baseDelay + jitter);
         continue;
       }
+
       return res;
-    } catch (err) {
-      if (init.method === 'GET' && attempt < maxRetries) {
+    } catch (err: unknown) {
+      if (init.signal && init.signal.aborted) {
+        throw err;
+      }
+
+      if (isNetworkOrTransientError(err) && attempt < maxRetries) {
         attempt++;
-        await sleep(delayMs * attempt);
+        const baseDelay = RETRY_DELAYS[attempt - 1] ?? 4000;
+        const jitter = Math.floor(Math.random() * 200);
+        await sleep(baseDelay + jitter);
         continue;
       }
+
       throw err;
     }
   }
@@ -88,7 +131,7 @@ export const apiClient = {
   },
 
   async post<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithRetry(`${BASE_URL}${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +144,7 @@ export const apiClient = {
   },
 
   async put<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithRetry(`${BASE_URL}${path}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -114,7 +157,7 @@ export const apiClient = {
   },
 
   async patch<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithRetry(`${BASE_URL}${path}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -127,7 +170,7 @@ export const apiClient = {
   },
 
   async delete<T = void>(path: string): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithRetry(`${BASE_URL}${path}`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',

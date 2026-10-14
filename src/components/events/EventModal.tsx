@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
-import { Category, CreateTaskPayload } from '../../types';
+import { Category, CreateTaskPayload, TaskItem, UpdateTaskPayload } from '../../types';
 import { getCurrentTimeString } from '../../utils/date';
 import { Bell } from 'lucide-react';
 
@@ -13,6 +13,8 @@ interface EventModalProps {
   categories: Category[];
   currentDate: string;
   onSubmitCreate: (payload: CreateTaskPayload) => Promise<void>;
+  eventToEdit?: TaskItem | null;
+  onSubmitUpdate?: (id: number, payload: UpdateTaskPayload) => Promise<void>;
 }
 
 interface ReminderOption {
@@ -27,12 +29,29 @@ const DEFAULT_REMINDER_OPTIONS: ReminderOption[] = [
   { value: '0', label: 'Al comenzar' },
 ];
 
+const offsetToPreset = (offsetMinutes: number): string | null => {
+  switch (offsetMinutes) {
+    case -1440:
+      return '-1d';
+    case -120:
+      return '-2h';
+    case -30:
+      return '-30m';
+    case 0:
+      return '0';
+    default:
+      return null;
+  }
+};
+
 export const EventModal: React.FC<EventModalProps> = ({
   isOpen,
   onClose,
   categories,
   currentDate,
   onSubmitCreate,
+  eventToEdit,
+  onSubmitUpdate,
 }) => {
   const [title, setTitle] = useState('');
   const [day, setDay] = useState(currentDate);
@@ -41,6 +60,33 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [selectedReminders, setSelectedReminders] = useState<string[]>(['-1d', '-2h', '0']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (eventToEdit) {
+      setTitle(eventToEdit.title);
+      setDay(eventToEdit.day);
+      setScheduledTime(eventToEdit.scheduledTime);
+      setCategoryId(eventToEdit.categoryId);
+      if (eventToEdit.reminders && eventToEdit.reminders.length > 0) {
+        const mapped: string[] = [];
+        for (const r of eventToEdit.reminders) {
+          const p = offsetToPreset(r.offsetMinutes);
+          if (p) mapped.push(p);
+        }
+        setSelectedReminders(mapped);
+      } else {
+        setSelectedReminders([]);
+      }
+      setError(null);
+    } else {
+      setTitle('');
+      setDay(currentDate);
+      setScheduledTime(getCurrentTimeString());
+      setCategoryId(categories[0]?.id || 1);
+      setSelectedReminders(['-1d', '-2h', '0']);
+      setError(null);
+    }
+  }, [eventToEdit, currentDate, categories, isOpen]);
 
   const toggleReminder = (val: string) => {
     setSelectedReminders((prev) =>
@@ -59,14 +105,24 @@ export const EventModal: React.FC<EventModalProps> = ({
     setError(null);
 
     try {
-      await onSubmitCreate({
-        title: title.trim(),
-        day,
-        scheduledTime,
-        categoryId,
-        kind: 'event',
-        reminders: selectedReminders,
-      });
+      if (eventToEdit && onSubmitUpdate) {
+        await onSubmitUpdate(eventToEdit.id, {
+          title: title.trim(),
+          day,
+          scheduledTime,
+          categoryId,
+          reminders: selectedReminders,
+        });
+      } else {
+        await onSubmitCreate({
+          title: title.trim(),
+          day,
+          scheduledTime,
+          categoryId,
+          kind: 'event',
+          reminders: selectedReminders,
+        });
+      }
       onClose();
       // Reset
       setTitle('');
@@ -83,7 +139,7 @@ export const EventModal: React.FC<EventModalProps> = ({
   }));
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Evento">
+    <Modal isOpen={isOpen} onClose={onClose} title={eventToEdit ? 'Editar Evento' : 'Nuevo Evento'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300">
@@ -166,7 +222,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             Cancelar
           </Button>
           <Button type="submit" variant="gold" isLoading={isLoading}>
-            Crear Evento
+            {eventToEdit ? 'Guardar Cambios' : 'Crear Evento'}
           </Button>
         </div>
       </form>

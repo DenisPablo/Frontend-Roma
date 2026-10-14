@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { categoriesService } from './categoriesService';
 import { tasksService } from './tasksService';
 import { workoutsService } from './workoutsService';
+import { fetchWithRetry } from './api';
 
 describe('API Services', () => {
   beforeEach(() => {
@@ -129,5 +130,38 @@ describe('API Services', () => {
         body: JSON.stringify(updatePayload),
       })
     );
+  });
+
+  it('fetchWithRetry retries on 503 error for POST and succeeds', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ status: 'success' }),
+      } as Response);
+
+    const res = await fetchWithRetry('/test-endpoint', { method: 'POST', body: '{}' }, 2);
+    expect(res.status).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('fetchWithRetry retries on network error (TypeError) and succeeds', async () => {
+    vi.mocked(fetch)
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ status: 'ok' }),
+      } as Response);
+
+    const res = await fetchWithRetry('/test-network-error', { method: 'GET' }, 2);
+    expect(res.status).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

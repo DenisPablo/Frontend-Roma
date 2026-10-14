@@ -50,6 +50,7 @@ export interface UpdateTaskPayload {
   scheduledTime?: string;
   categoryId?: number;
   durationSeconds?: number | null;
+  reminders?: string[];
 }
 
 export interface CompleteTaskResult {
@@ -91,7 +92,17 @@ export interface UpdateWorkoutSessionPayload {
   durationMinutes?: number | null;
 }
 
-export type TabType = 'tasks' | 'events' | 'gym' | 'categories' | 'dashboard';
+export type TabType = 'tasks' | 'events' | 'gym' | 'categories' | 'dashboard' | 'pomodoro';
+
+export type PomodoroMode = 'focus' | 'short_break' | 'long_break';
+
+export interface PomodoroSettings {
+  focusMinutes: number; // default 25
+  shortBreakMinutes: number; // default 5
+  longBreakMinutes: number; // default 15
+  longBreakInterval: number; // default 4
+  soundEnabled: boolean; // default true
+}
 
 export interface PeriodStats {
   from: string;

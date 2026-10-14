@@ -36,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 'categories':
         return 'Nueva Categoría';
       case 'dashboard':
+      case 'pomodoro':
         return null;
     }
   };
@@ -95,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Date Navigation Bar (shown on tasks, events and gym tabs) */}
-      {activeTab !== 'categories' && activeTab !== 'dashboard' && (
+      {activeTab !== 'categories' && activeTab !== 'dashboard' && activeTab !== 'pomodoro' && (
         <div className="flex items-center justify-between bg-slate-900/80 border border-slate-800/80 rounded-2xl p-1.5">
           <button
             onClick={() => onShiftDate(-1)}
